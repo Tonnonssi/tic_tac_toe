@@ -7,11 +7,6 @@ class Agent:
     def __init__(self, env):
         self.env = env
 
-    def _get_available_actions(self, state):
-        indices = np.arange(self.env.n_actions)
-        available_actions = indices[(state == 0).reshape(-1)].tolist()
-        return available_actions
-
     def random_action(self):
         '''
         totaly random action.
@@ -108,7 +103,7 @@ class Agent:
 
         return best_action
     
-    def alpha_beta(self, state, alpha, beta):
+    def _alpha_beta(self, state, alpha, beta):
         # 패배 시, 상태 가치 -10
         if state.is_lose():
             return self.env.reward['lose']
@@ -120,7 +115,7 @@ class Agent:
         # 합법적인 수의 상태 가치 계산
         for action in state.available_actions:
             # 상대방의 턴에서 탐색하므로, 상태 가치를 -로 반전
-            score = -self.alpha_beta(state.next(action), -beta, -alpha)
+            score = -self._alpha_beta(state.next(action), -beta, -alpha)
 
             # 현재 노드에서 알파 값을 업데이트
             if score > alpha:
@@ -140,7 +135,7 @@ class Agent:
         action_values = []
 
         for action in state.available_actions:
-            score = -self.alpha_beta(state.next(action), -float('inf'), -alpha)
+            score = -self._alpha_beta(state.next(action), -float('inf'), -alpha)
             action_values.append(score)
 
             if score > alpha:
@@ -150,12 +145,9 @@ class Agent:
         print("Available actions:", state.available_actions)        
         print("Action values:", action_values)
 
-        # 만약 여러 개의 최고값이 존재한다면 그 중 하나를 선택
-        max_value = max(action_values)
-        best_actions = [action for action, value in zip(state.available_actions, action_values) if value == max_value]
-        
-        # 여러 개의 동일한 최고값이 있을 때 랜덤으로 선택 
-        if len(best_actions) > 1:
-            best_action = random.choice(best_actions)
+        best_action = state.available_actions[self._argmax(action_values)]
 
         return best_action
+    
+    def _argmax(self, collection):
+        return np.arange(len(collection))[collection == np.max(collection)][0] # lst -> int
