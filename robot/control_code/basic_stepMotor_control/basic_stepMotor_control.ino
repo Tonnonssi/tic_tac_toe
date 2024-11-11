@@ -20,9 +20,9 @@ void setup() {
 void loop() {
   int val = analogRead(0);
 
-  stepper_1.step(val - previous);
-  stepper_2.step(val - previous);
-  stepper_3.step(val - previous);
+  stepper_1.step(200);
+  stepper_2.step(200);
+  stepper_3.step(200);
 
   previous = val;
 }
